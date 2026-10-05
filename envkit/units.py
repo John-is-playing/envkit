@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 _UNIT_FACTORS = {
     "B": 1,
     "KB": 1000,
@@ -43,11 +45,15 @@ def parse_size(text: str) -> int:
     if not raw:
         raise ValueError("容量字符串不能为空")
 
-    number, _, unit = raw.partition(" ")
-    unit = unit.strip() or "B"
+    match = re.fullmatch(r"([0-9]*\.?[0-9]+)\s*([A-Z]*)", raw)
+    if match is None:
+        raise ValueError(f"无法解析容量：{text!r}")
+
+    number, unit = match.group(1), match.group(2)
     unit = _UNIT_ALIASES.get(unit, unit)
-    if unit not in _UNIT_FACTORS:
+    if unit and unit not in _UNIT_FACTORS:
         raise ValueError(f"未知容量单位：{unit!r}")
+    unit = unit or "B"
 
     return int(float(number) * _UNIT_FACTORS[unit])
 

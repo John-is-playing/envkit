@@ -42,6 +42,13 @@ def test_parse_single_letter_aliases():
     assert parse_size("7 M") == 7_000_000
 
 
+def test_parse_without_space():
+    assert parse_size("512KB") == 512_000
+    assert parse_size("1.5GB") == 1_500_000_000
+    assert parse_size("2TB") == 2_000_000_000_000
+    assert parse_size("3B") == 3
+
+
 def test_parse_rejects_empty():
     with pytest.raises(ValueError):
         parse_size("   ")
