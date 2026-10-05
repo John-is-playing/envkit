@@ -73,4 +73,4 @@ def format_size(num_bytes: int, *, unit: str = "MB") -> str:
     if factor is None:
         raise ValueError(f"未知容量单位：{unit!r}")
 
-    return f"{num_bytes / factor:.2f} {unit.upper()}"
+    return f"{num_bytes / factor:.1f} {unit.upper()}"

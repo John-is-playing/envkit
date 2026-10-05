@@ -6,6 +6,8 @@ import re
 
 _UNSAFE = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 _EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+# 这些名字在不同平台上代表设备或特殊目录，不能直接当文件名用
+_RESERVED = {"CON", "PRN", "AUX", "NUL", "COM1", "LPT1"}
 
 
 def sanitize_filename(name: str) -> str:
@@ -40,6 +42,10 @@ def sanitize_filename(name: str) -> str:
 
     if not cleaned:
         raise ValueError("文件名不能为空")
+
+    stem = cleaned.split(".")[0]
+    if stem.upper() in _RESERVED:
+        cleaned = "_" + cleaned
 
     return cleaned
 
