@@ -84,3 +84,27 @@ def test_clear_drops_instances_but_keeps_registration():
     reg.clear()
     assert reg.has("a") is True
     assert reg.snapshot() == {}
+
+
+def test_snapshot_is_isolated_from_registry():
+    reg = Registry()
+    reg.register("service", lambda: {"name": "svc", "port": 8080})
+    reg.resolve("service")
+
+    snap = reg.snapshot()
+    snap["evil"] = "injected"
+    snap["service"]["port"] = 1
+
+    assert "evil" not in reg.snapshot()
+    assert reg.snapshot()["service"]["port"] == 8080
+
+
+def test_snapshot_does_not_share_nested_references():
+    payload = {"items": [1, 2]}
+    reg = Registry()
+    reg.register("thing", lambda: payload)
+    reg.resolve("thing")
+
+    snap = reg.snapshot()
+    assert snap["thing"] is not payload
+    assert snap["thing"]["items"] is not payload["items"]

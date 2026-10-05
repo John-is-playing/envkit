@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from collections.abc import Callable
 from typing import Any
 
@@ -62,7 +63,7 @@ class Registry:
 
         调用方拿到的是快照，对它的任何改动都不应影响注册表本身。
         """
-        return self._instances
+        return copy.deepcopy(self._instances)
 
     def clear(self) -> None:
         """丢弃所有已解析实例（保留登记信息）。"""
