@@ -29,6 +29,7 @@
 | `Registry.snapshot()` | 取注册表的只读快照 |
 | `TTLCache(ttl, clock=None)` | 带过期时间的缓存 |
 | `load_settings(defaults, env=None)` | 按「环境变量 > 默认值」装载配置 |
+| `load_toml(path)` / `load_yaml(path)` | 从 TOML / YAML 文件装载配置 |
 | `get_bool(name, default, env=None)` | 从环境变量读布尔 |
 | `parse_offset(text)` | 解析 `+08:00` 形式的时区偏移（分钟） |
 | `split_iso(text)` | 拆解 ISO-8601 时间戳的各字段 |
@@ -43,6 +44,26 @@
 cd demo/envkit/repo
 python -m pytest -q            # 基线应全绿
 ```
+
+## 从配置文件装载（本次新增）
+
+支持把 TOML / YAML 文件作为配置来源，与默认值、环境变量合并，
+优先级为：**命令行 > 环境变量 > 配置文件 > 默认值**。
+
+```python
+import os
+from envkit import load_settings
+from envkit.files import load_toml, load_yaml
+
+settings = load_settings(
+    {"db": {"host": "localhost", "port": 5432}},
+    source=load_toml("config.toml"),
+    env=os.environ,
+)
+```
+
+嵌套字典按层合并，文件不存在时给出清晰提示。
+详见 `envkit/files.py`。
 
 > 基线测试**刻意不覆盖**植入的缺陷路径——缺陷藏在没被覆盖的分支上，
 > 逼 Fissue 真正去「读代码 → 写验证器 → 跑 F2P」，而不是抄现成测试。
