@@ -42,15 +42,15 @@ class Registry:
     def resolve(self, key: str, **kwargs: Any) -> Any:
         """解析 ``key`` 对应的实例。
 
-        首次解析会用 ``kwargs`` 调用工厂并缓存结果；再次解析同一键时，
-        若传入的参数与首次不同，应重新构建并替换缓存。
+        首次解析会用 ``kwargs`` 调用工厂并缓存结果；若本次带了参数，
+        则重新构建并替换缓存。
 
         :raises KeyError: ``key`` 未登记
         """
         if key not in self._factories:
             raise KeyError(f"未注册：{key!r}")
 
-        if key in self._instances:
+        if key in self._instances and not kwargs:
             return self._instances[key]
 
         instance = self._factories[key](**kwargs)

@@ -52,6 +52,18 @@ def test_resolve_passes_kwargs_on_first_build():
     assert reg.resolve("point", x=1, y=2) == (1, 2)
 
 
+def test_resolve_rebuilds_when_kwargs_change():
+    reg = Registry()
+    reg.register("conn", lambda host="localhost": {"host": host})
+
+    first = reg.resolve("conn", host="db1")
+    second = reg.resolve("conn", host="db2")
+
+    assert first["host"] == "db1"
+    assert second["host"] == "db2"
+    assert second is not first
+
+
 def test_resolve_unknown_raises():
     reg = Registry()
     with pytest.raises(KeyError):
