@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+import copy
 import os
 from collections.abc import Mapping
 from typing import Any
 
 _TRUE_WORDS = {"1", "true", "yes", "on", "y"}
 _FALSE_WORDS = {"0", "false", "no", "off", "n"}
-
 
 def load_settings(
     defaults: Mapping[str, Any],
@@ -34,7 +34,9 @@ def load_settings(
         {'PORT': 8080}
     """
     source: Mapping[str, str] = os.environ if env is None else env
-    settings = dict(defaults)
+    # 深拷贝：嵌套的 dict / list 等可变值也不能与入参共享引用，
+    # 否则调用方修改返回的配置会污染 ``defaults``。
+    settings = copy.deepcopy(dict(defaults))
 
     for key in defaults:
         env_name = f"{prefix}{key}".upper()
@@ -44,7 +46,6 @@ def load_settings(
         settings[key] = value
 
     return settings
-
 
 def get_bool(
     name: str,
