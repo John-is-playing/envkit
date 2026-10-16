@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 _UNIT_FACTORS = {
     "B": 1,
     "KB": 1000,
@@ -16,6 +18,8 @@ _UNIT_ALIASES = {
     "G": "GB",
     "T": "TB",
 }
+
+_SIZE_RE = re.compile(r"^(?P<number>\d+(?:\.\d+)?)\s*(?P<unit>[A-Za-z]+)?$")
 
 
 def parse_size(text: str) -> int:
@@ -39,17 +43,27 @@ def parse_size(text: str) -> int:
     if not isinstance(text, str):
         raise TypeError("text 必须是字符串")
 
-    raw = text.strip().upper()
+    raw = text.strip()
     if not raw:
         raise ValueError("容量字符串不能为空")
 
-    number, _, unit = raw.partition(" ")
-    unit = unit.strip() or "B"
+    match = _SIZE_RE.match(raw)
+    if match is None:
+        raise ValueError(f"无法解析容量字符串：{text!r}")
+
+    number = match.group("number")
+    unit = match.group("unit")
+    unit = (unit or "B").upper()
     unit = _UNIT_ALIASES.get(unit, unit)
     if unit not in _UNIT_FACTORS:
         raise ValueError(f"未知容量单位：{unit!r}")
 
-    return int(float(number) * _UNIT_FACTORS[unit])
+    try:
+        value = float(number)
+    except ValueError as exc:  # pragma: no cover - 正则已保证可解析
+        raise ValueError(f"无法解析容量字符串：{text!r}") from exc
+
+    return int(value * _UNIT_FACTORS[unit])
 
 
 def format_size(num_bytes: int, *, unit: str = "MB") -> str:
