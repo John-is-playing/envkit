@@ -88,6 +88,14 @@ def split_iso(text: str) -> dict[str, int | str]:
         raise ValueError(f"非法时间：{text!r}")
 
     hour_of_day, minute, second = (int(x) for x in time_fields)
+
+    if not 0 <= hour_of_day <= 23:
+        raise ValueError(f"非法时间：{text!r}")
+    if not 0 <= minute <= 59:
+        raise ValueError(f"非法时间：{text!r}")
+    if not 0 <= second <= 59:
+        raise ValueError(f"非法时间：{text!r}")
+
     offset = parse_offset(offset_part) if offset_part else 0
 
     return {
