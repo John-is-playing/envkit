@@ -26,6 +26,9 @@ def parse_offset(text: str) -> int:
     if raw in ("Z", "z", "+00:00", "-00:00"):
         return 0
 
+    sign = 1
+    if raw.startswith("-"):
+        sign = -1
     body = raw.lstrip("+-")
 
     parts = body.split(":")
@@ -41,7 +44,7 @@ def parse_offset(text: str) -> int:
     if minutes >= 60:
         raise ValueError(f"分钟数越界：{text!r}")
 
-    return hours * 60 + minutes
+    return sign * (hours * 60 + minutes)
 
 
 def split_iso(text: str) -> dict[str, int | str]:
